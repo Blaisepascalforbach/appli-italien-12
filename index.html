@@ -264,7 +264,8 @@
 	                            </div>
 	                            <span id="chaptersCount" class="text-xs font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded shrink-0">—</span>
 	                        </div>
-	                        <div id="chaptersList" class="mt-4 flex flex-wrap gap-2"></div>
+	                        <div class="mt-4 h-2 w-full bg-slate-100 rounded-full overflow-hidden"><div id="chaptersProgress" class="h-full bg-indigo-500 transition-all duration-300" style="width:0%"></div></div>
+	                        <div id="chaptersList" class="mt-4 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2"></div>
 	                    </div>
 	                </section>
 
@@ -1410,11 +1411,14 @@ che ancora abbiamo dentro di noi: per il resto niente ci può fermare.`,
             if (!list) return;
             const doneCount = chapters.filter(isChapterValidated).length;
             if (countEl) countEl.textContent = `${doneCount}/${chapters.length} TAPPE`;
+            const progressEl = document.getElementById("chaptersProgress");
+            if (progressEl) progressEl.style.width = `${(doneCount/chapters.length)*100}%`;
 
             const next = chapters.find(ch => !isChapterValidated(ch)) || null;
 
             list.innerHTML = chapters.map((ch, idx) => {
                 const range = ch.end != null ? `${formatTime(ch.start)}–${formatTime(ch.end)}` : `${formatTime(ch.start)}`;
+                const minuteSlot = `Min. ${Math.floor(ch.start/60)}`;
                 const isCurrent = Boolean(currentChapter && currentChapter.id === ch.id);
                 const isValidated = isChapterValidated(ch);
                 const isAnswered = isChapterComplete(ch);
@@ -1443,7 +1447,7 @@ che ancora abbiamo dentro di noi: per il resto niente ci può fermare.`,
 
                 return `
                     <button type="button" ${ariaCurrent} title="${title}" class="${base} ${cls} ${ring}" onclick="playChapter('${ch.id}')">
-                        <div class="text-[10px] font-black uppercase tracking-wide ${timeClass}">${range}</div>
+                        <div class="flex items-center justify-between text-[10px] font-black uppercase tracking-wide ${timeClass}"><span>${range}</span><span class="px-1.5 py-0.5 rounded bg-white/60 text-[9px]">${minuteSlot}</span></div>
                         <div class="mt-0.5 text-xs font-black flex items-center gap-2">
                             <span class="${iconClass}"><i class="fas ${icon}"></i></span>
                             <span>${idx + 1}. ${ch.title}</span>
@@ -2220,6 +2224,12 @@ che ancora abbiamo dentro di noi: per il resto niente ci può fermare.`,
             if (m) m.classList.add('hidden');
             renderQuestion();
         }
+    
+        document.addEventListener('DOMContentLoaded', () => {
+            renderSequenceBar();
+            const timeWindow = document.getElementById('sequence-time-window');
+            if (timeWindow) timeWindow.innerText = getMinuteWindow(sequences[currentLevel].time);
+        });
     </script>
 </body>
 </html>
